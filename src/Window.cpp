@@ -1,6 +1,6 @@
 #include "Window.hpp"
 
-Window::Window(const std::string & name, unsigned int width, unsigned int height)
+Window::Window(const std::string& name, unsigned int width, unsigned int height)
 {
 	glfwInit();
 
