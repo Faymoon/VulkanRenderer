@@ -35,14 +35,7 @@ class HelloTriangleApplication
 
 		void initVulkan()
 		{
-			std::vector<VkExtensionProperties> extensions = renderer.GetAvailableExtensions();
-
-			std::cout << "Available : extensions :" << std::endl;
-
-			for (const auto& extension : extensions)
-			{
-				std::cout << "\t\t * " << extension.extensionName << std::endl;
-			}
+			std::cout << "Vulkan Created" << std::endl;
 		}
 
 		void mainLoop()

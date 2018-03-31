@@ -7,18 +7,18 @@ Window::Window(const std::string& name, unsigned int width, unsigned int height)
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
-	window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+	m_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
 }
 
 Window::~Window()
 {
-	glfwDestroyWindow(window);
+	glfwDestroyWindow(m_window);
 	glfwTerminate();
 }
 
 bool Window::IsOpen()
 {
-	return !glfwWindowShouldClose(window);
+	return !glfwWindowShouldClose(m_window);
 }
 
 Window::Event Window::PollEvent()

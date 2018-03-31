@@ -9,6 +9,8 @@
 
 class Renderer
 {
+	friend class Device;
+
 	public:
 		Renderer(const std::string& name);
 
@@ -17,13 +19,13 @@ class Renderer
 		Renderer(Renderer&&) = default;
 		~Renderer();
 
-		std::vector<VkExtensionProperties> GetAvailableExtensions();// TO DELETE
-
 	private:
 
 		template<typename Func>
 		Func GetExtensionFunc(const std::string& name);
 		std::vector<const char*> GetRequiredExtensions();
+
+		VkInstance m_instance;
 
 #ifndef NDEBUG
 		bool CheckValidationLayersSupport(const std::vector<const char*> requestedLayers);
@@ -39,13 +41,9 @@ class Renderer
 			const char* layerPrefix,
 			const char* msg,
 			void* userData);
-#endif // !NDEBUG
 
-#ifndef NDEBUG
-		VkDebugReportCallbackEXT callback;
+		VkDebugReportCallbackEXT m_callback;
 #endif // !NDEBUG
-
-		VkInstance instance;
 };
 
 #include "Renderer.inl"

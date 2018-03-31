@@ -42,7 +42,7 @@ Renderer::Renderer(const std::string& name)
 	createInfo.ppEnabledLayerNames = validationLayers.data();
 #endif // !NDEBUG
 
-	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
+	if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
 		throw std::runtime_error("Failed : VkInstance creation");
 
 #ifndef NDEBUG
@@ -55,10 +55,10 @@ Renderer::~Renderer()
 {
 #ifndef NDEBUG
 	auto func = GetExtensionFunc<PFN_vkDestroyDebugReportCallbackEXT>("vkDestroyDebugReportCallbackEXT");
-	func(instance, callback, nullptr);
+	func(m_instance, m_callback, nullptr);
 #endif // !NDEBUG
 
-	vkDestroyInstance(instance, nullptr);
+	vkDestroyInstance(m_instance, nullptr);
 }
 
 std::vector<const char*> Renderer::GetRequiredExtensions()
@@ -72,17 +72,6 @@ std::vector<const char*> Renderer::GetRequiredExtensions()
 #ifndef NDEBUG
 	extensions.push_back(VK_EXT_DEBUG_REPORT_EXTENSION_NAME);
 #endif // !NDEBUG
-
-	return extensions;
-}
-
-std::vector<VkExtensionProperties> Renderer::GetAvailableExtensions()
-{
-	uint32_t extensionCount;
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
-
-	std::vector<VkExtensionProperties> extensions(extensionCount);
-	vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
 
 	return extensions;
 }
@@ -121,7 +110,7 @@ void Renderer::SetupDebugCallback()
 	createInfo.pfnCallback = debugCallback;
 
 	auto func = GetExtensionFunc<PFN_vkCreateDebugReportCallbackEXT>("vkCreateDebugReportCallbackEXT");
-	if (func(instance, &createInfo, nullptr, &callback) != VK_SUCCESS)
+	if (func(m_instance, &createInfo, nullptr, &m_callback) != VK_SUCCESS)
 		throw std::runtime_error("Failed : Debug callback creation");
 }
 

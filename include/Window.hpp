@@ -26,7 +26,7 @@ class Window
 		struct Event {};
 
 	private:
-		GLFWwindow* window;
+		GLFWwindow* m_window;
 };
 
 #endif // !WINDOW_HPP
