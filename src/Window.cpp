@@ -1,5 +1,7 @@
 #include "Window.hpp"
 
+#include <iostream>
+
 Window::Window(const std::string& name, unsigned int width, unsigned int height)
 {
 	glfwInit();
@@ -8,6 +10,8 @@ Window::Window(const std::string& name, unsigned int width, unsigned int height)
 	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	m_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
+
+	glfwDefaultWindowHints();
 }
 
 Window::~Window()
@@ -21,9 +25,7 @@ bool Window::IsOpen()
 	return !glfwWindowShouldClose(m_window);
 }
 
-Window::Event Window::PollEvent()
+void Window::PollEvents()
 {
 	glfwPollEvents();
-
-	return Event();
 }

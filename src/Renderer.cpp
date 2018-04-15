@@ -9,11 +9,13 @@
 
 
 Renderer::Renderer(const std::string& name)
+#ifndef NDEBUG
+	:
+	m_validationLayers{ "VK_LAYER_LUNARG_standard_validation" }
+#endif // !NDEBUG
 {
 #ifndef NDEBUG
-	std::vector<const char*> validationLayers{ "VK_LAYER_LUNARG_standard_validation" };
-
-	if (!CheckValidationLayersSupport(validationLayers))
+	if (!CheckValidationLayersSupport())
 		throw std::runtime_error("Not Supported : Layers");
 #endif // !NDEBUG
 
@@ -38,8 +40,8 @@ Renderer::Renderer(const std::string& name)
 	createInfo.enabledLayerCount = 0;
 
 #ifndef NDEBUG
-	createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-	createInfo.ppEnabledLayerNames = validationLayers.data();
+	createInfo.enabledLayerCount = static_cast<uint32_t>(m_validationLayers.size());
+	createInfo.ppEnabledLayerNames = m_validationLayers.data();
 #endif // !NDEBUG
 
 	if (vkCreateInstance(&createInfo, nullptr, &m_instance) != VK_SUCCESS)
@@ -54,7 +56,7 @@ Renderer::Renderer(const std::string& name)
 Renderer::~Renderer()
 {
 #ifndef NDEBUG
-	auto func = GetExtensionFunc<PFN_vkDestroyDebugReportCallbackEXT>("vkDestroyDebugReportCallbackEXT");
+	auto func = (PFN_vkDestroyDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkDestroyDebugReportCallbackEXT");
 	func(m_instance, m_callback, nullptr);
 #endif // !NDEBUG
 
@@ -77,7 +79,7 @@ std::vector<const char*> Renderer::GetRequiredExtensions()
 }
 
 #ifndef NDEBUG
-bool Renderer::CheckValidationLayersSupport(const std::vector<const char*> requestedLayers)
+bool Renderer::CheckValidationLayersSupport()
 {
 	uint32_t layerCount;
 	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
@@ -85,7 +87,7 @@ bool Renderer::CheckValidationLayersSupport(const std::vector<const char*> reque
 	std::vector<VkLayerProperties> layers(layerCount);
 	vkEnumerateInstanceLayerProperties(&layerCount, layers.data());
 
-	for (auto requestedLayer : requestedLayers)
+	for (auto requestedLayer : m_validationLayers)
 	{
 		bool found = false;
 
@@ -102,19 +104,7 @@ bool Renderer::CheckValidationLayersSupport(const std::vector<const char*> reque
 	return true;
 }
 
-void Renderer::SetupDebugCallback()
-{
-	VkDebugReportCallbackCreateInfoEXT createInfo = {};
-	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
-	createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
-	createInfo.pfnCallback = debugCallback;
-
-	auto func = GetExtensionFunc<PFN_vkCreateDebugReportCallbackEXT>("vkCreateDebugReportCallbackEXT");
-	if (func(m_instance, &createInfo, nullptr, &m_callback) != VK_SUCCESS)
-		throw std::runtime_error("Failed : Debug callback creation");
-}
-
-VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::debugCallback(
+VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	VkDebugReportFlagsEXT flags,
 	VkDebugReportObjectTypeEXT objType,
 	uint64_t obj,
@@ -127,5 +117,17 @@ VKAPI_ATTR VkBool32 VKAPI_CALL Renderer::debugCallback(
 	std::cerr << layerPrefix << " : " << msg << std::endl;
 
 	return VK_FALSE;
+}
+
+void Renderer::SetupDebugCallback()
+{
+	VkDebugReportCallbackCreateInfoEXT createInfo = {};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_REPORT_CALLBACK_CREATE_INFO_EXT;
+	createInfo.flags = VK_DEBUG_REPORT_ERROR_BIT_EXT | VK_DEBUG_REPORT_WARNING_BIT_EXT;
+	createInfo.pfnCallback = debugCallback;
+
+	auto func = (PFN_vkCreateDebugReportCallbackEXT)vkGetInstanceProcAddr(m_instance, "vkCreateDebugReportCallbackEXT");
+	if (!func ||func(m_instance, &createInfo, nullptr, &m_callback) != VK_SUCCESS)
+		throw std::runtime_error("Failed : Debug callback creation");
 }
 #endif // !NDEBUG

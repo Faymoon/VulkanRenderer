@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "Renderer.hpp"
+#include "Device.hpp"
 #include "Window.hpp"
 
 constexpr unsigned int WIDTH = 800;
@@ -17,7 +18,10 @@ class HelloTriangleApplication
 			:
 			name(std::move(appName)),
 			window(name, WIDTH, HEIGHT),
-			renderer(name)
+			renderer(name),
+			surface(window, renderer),
+			device(renderer, surface),
+			swapchain(surface, device)
 		{}
 
 		void run()
@@ -32,6 +36,9 @@ class HelloTriangleApplication
 		Window window;
 
 		Renderer renderer;
+		Surface surface;
+		Device device;
+		SwapChain swapchain;
 
 		void initVulkan()
 		{
@@ -42,7 +49,7 @@ class HelloTriangleApplication
 		{
 			while (window.IsOpen())
 			{
-				window.PollEvent();
+				window.PollEvents();
 			}
 		}
 };

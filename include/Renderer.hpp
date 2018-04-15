@@ -5,44 +5,42 @@
 #define RENDERER_HPP
 
 #include <string>
+#include <vector>
+
+#ifdef _WIN64 || _WIN32
+#define VK_USE_PLATFORM_WIN32_KHR
+#elif defined(__linux)
+#define VK_USE_PLATFORM_XLIB_KHR
+#endif
 #include <vulkan/vulkan.h>
+
 
 class Renderer
 {
 	friend class Device;
+	friend class Surface;
 
 	public:
-		Renderer(const std::string& name);
-
 		Renderer() = delete;
+		Renderer(const std::string& name);
 		Renderer(const Renderer&) = delete;
 		Renderer(Renderer&&) = default;
 		~Renderer();
 
 	private:
 
-		template<typename Func>
-		Func GetExtensionFunc(const std::string& name);
 		std::vector<const char*> GetRequiredExtensions();
 
 		VkInstance m_instance;
 
 #ifndef NDEBUG
-		bool CheckValidationLayersSupport(const std::vector<const char*> requestedLayers);
+		bool CheckValidationLayersSupport();
 
 		void SetupDebugCallback();
 
-		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
-			VkDebugReportFlagsEXT flags,
-			VkDebugReportObjectTypeEXT objType,
-			uint64_t obj,
-			size_t location,
-			int32_t code,
-			const char* layerPrefix,
-			const char* msg,
-			void* userData);
-
 		VkDebugReportCallbackEXT m_callback;
+
+		std::vector<const char*> m_validationLayers;
 #endif // !NDEBUG
 };
 
