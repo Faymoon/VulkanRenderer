@@ -49,6 +49,6 @@ project "VulkanRenderer"
     libdirs{ "C:/glfw/lib-vc2015" }
 
     links { 
-        "vulkan-1.lib",
-        "glfw3.lib"
+        "vulkan-1",
+        "glfw3"
      }
