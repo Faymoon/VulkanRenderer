@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <stdexcept>
 #include <functional>
@@ -17,11 +16,11 @@ class HelloTriangleApplication
 		HelloTriangleApplication(std::string appName)
 			:
 			name(std::move(appName)),
-			window(name, WIDTH, HEIGHT),
-			renderer(name),
-			surface(window, renderer),
-			device(renderer, surface),
-			swapchain(surface, device)
+			window(std::make_shared<Window>(name, WIDTH, HEIGHT)),
+			renderer(std::make_shared<Renderer>(name)),
+			surface(std::make_shared<Surface>(window, renderer)),
+			device(std::make_shared<Device>(renderer, surface)),
+			swapchain(std::make_shared<SwapChain>(surface, device, WIDTH, HEIGHT))
 		{}
 
 		void run()
@@ -33,12 +32,12 @@ class HelloTriangleApplication
 	private:
 		std::string name;
 
-		Window window;
+		std::shared_ptr<Window> window;
 
-		Renderer renderer;
-		Surface surface;
-		Device device;
-		SwapChain swapchain;
+		std::shared_ptr<Renderer> renderer;
+		std::shared_ptr<Surface> surface;
+		std::shared_ptr<Device> device;
+		std::shared_ptr<SwapChain> swapchain;
 
 		void initVulkan()
 		{
@@ -47,9 +46,9 @@ class HelloTriangleApplication
 
 		void mainLoop()
 		{
-			while (window.IsOpen())
+			while (window->IsOpen())
 			{
-				window.PollEvents();
+				window->PollEvents();
 			}
 		}
 };

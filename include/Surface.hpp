@@ -14,17 +14,19 @@ class Surface
 
 	public:
 		Surface() = delete;
-		Surface(Window& window, Renderer& renderer);
+		Surface(std::shared_ptr<Window> window, std::shared_ptr<Renderer> renderer);
 		Surface(const Surface&) = delete;
 		Surface(Surface&&) = default;
 		~Surface();
 
 	private:
 
+		VkSurfaceKHR GetHandle();
+
 		VkSurfaceKHR m_surface;
 
-		Window& m_window;
-		Renderer& m_renderer;
+		std::shared_ptr<Window> m_window;
+		std::shared_ptr<Renderer> m_renderer;
 };
 
 #endif // !SURFACE_HPP

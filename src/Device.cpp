@@ -4,7 +4,7 @@
 #include <iostream>
 #include <algorithm>
 
-Device::Device(Renderer& renderer, Surface& surface)
+Device::Device(std::shared_ptr<Renderer> renderer, std::shared_ptr<Surface> surface)
 	:
 	m_renderer(renderer),
 	m_surface(surface),
@@ -13,12 +13,12 @@ Device::Device(Renderer& renderer, Surface& surface)
 	m_extensions{ VK_KHR_SWAPCHAIN_EXTENSION_NAME }
 {
 	uint32_t count;
-	vkEnumeratePhysicalDevices(m_renderer.m_instance, &count, nullptr);
+	vkEnumeratePhysicalDevices(m_renderer->GetHandle(), &count, nullptr);
 	if (!count)
 		throw std::runtime_error("Not Supported : Physical device");
 
 	std::vector<VkPhysicalDevice> physicalDevices(count);
-	vkEnumeratePhysicalDevices(m_renderer.m_instance, &count, physicalDevices.data());
+	vkEnumeratePhysicalDevices(m_renderer->GetHandle(), &count, physicalDevices.data());
 	
 	SwapChain::AvailableDetails availableDetails;
 
@@ -29,7 +29,7 @@ Device::Device(Renderer& renderer, Surface& surface)
 			m_queueIndices = PickQueueFamilies(device);
 			if (m_queueIndices.IsComplete())
 			{
-				availableDetails = SwapChain::QueryAvailableDetails(device, m_surface);
+				availableDetails = SwapChain::QueryAvailableDetails(device, m_surface->GetHandle());
 				if (!availableDetails.formats.empty() && !availableDetails.modes.empty())
 				{
 					m_physicalDevice = device;
@@ -70,8 +70,8 @@ Device::Device(Renderer& renderer, Surface& surface)
 
 	deviceInfo.enabledLayerCount = 0;
 #ifndef NDEBUG
-	deviceInfo.enabledLayerCount = static_cast<uint32_t>(m_renderer.m_validationLayers.size());
-	deviceInfo.ppEnabledLayerNames = m_renderer.m_validationLayers.data();
+	deviceInfo.enabledLayerCount = static_cast<uint32_t>(m_renderer->m_validationLayers.size());
+	deviceInfo.ppEnabledLayerNames = m_renderer->m_validationLayers.data();
 #endif // !NDEBUG
 
 	if (vkCreateDevice(m_physicalDevice, &deviceInfo, nullptr, &m_device) != VK_SUCCESS)
@@ -84,6 +84,16 @@ Device::Device(Renderer& renderer, Surface& surface)
 Device::~Device()
 {
 	vkDestroyDevice(m_device, nullptr);
+}
+
+VkDevice Device::GetHandle()
+{
+	return m_device;
+}
+
+VkPhysicalDevice Device::GetPhysicalHandle()
+{
+	return m_physicalDevice;
 }
 
 bool Device::IsDeviceSuitable(VkPhysicalDevice device)
@@ -136,7 +146,7 @@ Device::QueueFamilyIndices Device::PickQueueFamilies(VkPhysicalDevice device)
 			queueIndices.graphics = i;
 
 		VkBool32 presentSupport;
-		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface.m_surface, &presentSupport);
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_surface->GetHandle(), &presentSupport);
 
 		if (property.queueCount > 0 && presentSupport)
 			queueIndices.present = i;

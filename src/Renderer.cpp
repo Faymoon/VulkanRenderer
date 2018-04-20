@@ -63,6 +63,11 @@ Renderer::~Renderer()
 	vkDestroyInstance(m_instance, nullptr);
 }
 
+VkInstance Renderer::GetHandle()
+{
+	return m_instance;
+}
+
 std::vector<const char*> Renderer::GetRequiredExtensions()
 {
 	uint32_t glfwExtensionCount = 0;

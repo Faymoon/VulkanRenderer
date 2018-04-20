@@ -5,9 +5,9 @@
 
 #include <vulkan/vulkan.h>
 
-#include <SwapChain.hpp>
-#include <Renderer.hpp>
-#include <Surface.hpp>
+#include "SwapChain.hpp"
+#include "Renderer.hpp"
+#include "Surface.hpp"
 
 class Device
 {
@@ -15,12 +15,15 @@ class Device
 
 	public:
 		Device() = delete;
-		Device(Renderer& renderer, Surface& surface);
+		Device(std::shared_ptr<Renderer> renderer, std::shared_ptr<Surface> surface);
 		Device(const Device&) = delete;
 		Device(Device&&) = default;
 		~Device();
 
 	private:
+
+		VkDevice GetHandle();
+		VkPhysicalDevice GetPhysicalHandle();
 
 		struct QueueFamilyIndices
 		{
@@ -44,8 +47,8 @@ class Device
 		VkQueue m_graphicsQueue;
 		VkQueue m_presentQueue;
 
-		Renderer& m_renderer;
-		Surface& m_surface;
+		std::shared_ptr<Renderer> m_renderer;
+		std::shared_ptr<Surface> m_surface;
 };
 
 #endif//!DEVICE_HPP

@@ -40,6 +40,9 @@ class Window
 		void OnFocusChanged();
 
 	private:
+
+		GLFWwindow* GetHandle();
+
 		GLFWwindow* m_window;
 };
 
